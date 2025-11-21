@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView rawDataDisplay;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private String result;
     private String url1="";
     private String urlSource="https://www.fx-exchange.com/gbp/rss.xml";
+    private ArrayList<Item> allItems;
+    private ArrayList<Currency> allCurrency;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +81,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             BufferedReader in = null;
             String inputLine = "";
 
-
             Log.d("MyTask","in run");
 
-            Item aItem = null;
+            allItems = new ArrayList<>();
+
             try
             {
                 Log.d("MyTask","in try");
@@ -105,90 +108,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             i = result.indexOf("</rss>"); //final tag
             result = result.substring(0, i + 6);
 
-            // Now that you have the xml data into result, you can parse it
-            try {
-                boolean insideAnItem = false;
-                XmlPullParserFactory factory =
-                        XmlPullParserFactory.newInstance();
-                factory.setNamespaceAware(true);
-                XmlPullParser xpp = factory.newPullParser();
-                xpp.setInput( new StringReader( result ) );
+            parseXMLData();
 
-                //My pullparser
-                int eventType = xpp.getEventType();
-                while (eventType != XmlPullParser.END_DOCUMENT)
-                {
-                    if(eventType == XmlPullParser.START_TAG){
-                        Log.e("Start tag", "Inside XML object");
+            allCurrency = new ArrayList<>();
 
-                        if(xpp.getName().equalsIgnoreCase("item")){
-                            insideAnItem = true;
-                            aItem = new Item();
-                            Log.e("Inside item", "New item found");
-                        }else if (xpp.getName().equalsIgnoreCase("title")){
-                            String temp = xpp.nextText();
-                            if(insideAnItem){
-                                aItem.setTitle(temp);
-                                Log.d("MyTag", "Item title: " + temp);
-                            }else{
-                                Log.d("MyTag", "Some other title" + temp);
-                            }
-                        }else if(xpp.getName().equalsIgnoreCase("link")){
-                            String temp = xpp.nextText();
-                            if(insideAnItem){
-                                aItem.setLink(temp);
-                                Log.d("MyTag", "Item link: " + temp);
-                            }else{
-                                Log.d("MyTag", "Some other link" + temp);
-                            }
-                        }else if(xpp.getName().equalsIgnoreCase("guid")){
-                            String temp = xpp.nextText();
-                            if(insideAnItem){
-                                aItem.setGuid(temp);
-                                Log.d("MyTag", "Item guid: " + temp);
-                            }else{
-                                Log.d("MyTag", "Some other guid" + temp);
-                            }
-                        }else if(xpp.getName().equalsIgnoreCase("pubDate")){
-                            String temp = xpp.nextText();
-                            if(insideAnItem){
-                                aItem.setPubDate(temp);
-                                Log.d("MyTag", "Item pubDate: " + temp);
-                            }else{
-                                Log.d("MyTag", "Some other pubDate" + temp);
-                            }
-                        }else if(xpp.getName().equalsIgnoreCase("description")){
-                            String temp = xpp.nextText();
-                            if(insideAnItem){
-                                aItem.setDescription(temp);
-                                Log.d("MyTag", "Item description: " + temp);
-                            }else{
-                                Log.d("MyTag", "Some other description" + temp);
-                            }
-                        }else if(xpp.getName().equalsIgnoreCase("category")){
-                            String temp = xpp.nextText();
-                            if(insideAnItem){
-                                aItem.setCategory(temp);
-                                Log.d("MyTag", "Item category: " + temp);
-                            }else{
-                                Log.d("MyTag", "Some other category" + temp);
-                            }
-                        }
-                    } else if(eventType == XmlPullParser.END_TAG){
-                        if(xpp.getName().equalsIgnoreCase("item")){
-                            insideAnItem = false;
-                            Log.d("MyTag", "Item parsing complete");
-                        }
-                    }
-                    eventType = xpp.next();
-                }
-            } catch (XmlPullParserException e) {
-                Log.e("Parsing","EXCEPTION" + e);
-                //throw new RuntimeException(e);
-            }catch (IOException e) {
-                Log.e("Parsing","I/O EXCEPTION" + e);
-                //throw new RuntimeException(e);
+            for(Item item : allItems){
+                Currency currency = new Currency();
+                currency.convertItemToCurrency(item);
+                allCurrency.add(currency);
             }
+
 
 
             // Now update the TextView to display raw XML data
@@ -203,7 +132,96 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 }
             });
         }
-
     }
+
+    public void parseXMLData(){
+        Item aItem = null;
+        // Now that you have the xml data into result, you can parse it
+        try {
+            boolean insideAnItem = false;
+            XmlPullParserFactory factory =
+                    XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            XmlPullParser xpp = factory.newPullParser();
+            xpp.setInput( new StringReader( result ) );
+
+            //My pullparser
+            int eventType = xpp.getEventType();
+            while (eventType != XmlPullParser.END_DOCUMENT)
+            {
+                if(eventType == XmlPullParser.START_TAG){
+                    Log.e("Start tag", "Inside XML object");
+
+                    if(xpp.getName().equalsIgnoreCase("item")){
+                        insideAnItem = true;
+                        aItem = new Item();
+                        Log.e("Inside item", "New item found");
+                    }else if (xpp.getName().equalsIgnoreCase("title")){
+                        String temp = xpp.nextText();
+                        if(insideAnItem){
+                            aItem.setTitle(temp);
+                            Log.d("MyTag", "Item title: " + temp);
+                        }else{
+                            Log.d("MyTag", "Some other title" + temp);
+                        }
+                    }else if(xpp.getName().equalsIgnoreCase("link")){
+                        String temp = xpp.nextText();
+                        if(insideAnItem){
+                            aItem.setLink(temp);
+                            Log.d("MyTag", "Item link: " + temp);
+                        }else{
+                            Log.d("MyTag", "Some other link" + temp);
+                        }
+                    }else if(xpp.getName().equalsIgnoreCase("guid")){
+                        String temp = xpp.nextText();
+                        if(insideAnItem){
+                            aItem.setGuid(temp);
+                            Log.d("MyTag", "Item guid: " + temp);
+                        }else{
+                            Log.d("MyTag", "Some other guid" + temp);
+                        }
+                    }else if(xpp.getName().equalsIgnoreCase("pubDate")){
+                        String temp = xpp.nextText();
+                        if(insideAnItem){
+                            aItem.setPubDate(temp);
+                            Log.d("MyTag", "Item pubDate: " + temp);
+                        }else{
+                            Log.d("MyTag", "Some other pubDate" + temp);
+                        }
+                    }else if(xpp.getName().equalsIgnoreCase("description")){
+                        String temp = xpp.nextText();
+                        if(insideAnItem){
+                            aItem.setDescription(temp);
+                            Log.d("MyTag", "Item description: " + temp);
+                        }else{
+                            Log.d("MyTag", "Some other description" + temp);
+                        }
+                    }else if(xpp.getName().equalsIgnoreCase("category")){
+                        String temp = xpp.nextText();
+                        if(insideAnItem){
+                            aItem.setCategory(temp);
+                            Log.d("MyTag", "Item category: " + temp);
+                        }else{
+                            Log.d("MyTag", "Some other category" + temp);
+                        }
+                    }
+                } else if(eventType == XmlPullParser.END_TAG){
+                    if(xpp.getName().equalsIgnoreCase("item")){
+                        allItems.add(aItem);
+                        insideAnItem = false;
+                        Log.d("MyTag", "Item parsing complete");
+                    }
+                }
+                eventType = xpp.next();
+            }
+        } catch (XmlPullParserException e) {
+            Log.e("Parsing","EXCEPTION" + e);
+            //throw new RuntimeException(e);
+        }catch (IOException e) {
+            Log.e("Parsing","I/O EXCEPTION" + e);
+            //throw new RuntimeException(e);
+        }
+    }
+
 
 }
