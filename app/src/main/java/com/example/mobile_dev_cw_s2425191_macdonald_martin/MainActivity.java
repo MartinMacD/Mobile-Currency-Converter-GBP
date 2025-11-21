@@ -1,16 +1,9 @@
-/*  Starter project for Mobile Platform Development - 1st diet 25/26
-    You should use this project as the starting point for your assignment.
-    This project simply reads the data from the required URL and displays the
-    raw data in a TextField
-*/
-
 //
 // Name                 Martin MacDonald
 // Student ID           s2425191
 // Programme of Study   BSc (Hons) Software Development
 //
 
-// UPDATE THE PACKAGE NAME to include your Student Identifier
 package com.example.mobile_dev_cw_s2425191_macdonald_martin;
 
 import android.os.Bundle;
@@ -118,7 +111,12 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 allCurrency.add(currency);
             }
 
-
+            ArrayList<Currency> mainCurrencies = new ArrayList<>();
+            for (Currency c : allCurrency) {
+                if (c.getCode().equals("USD") || c.getCode().equals("EUR") || c.getCode().equals("JPY")) {
+                    mainCurrencies.add(c);
+                }
+            }
 
             // Now update the TextView to display raw XML data
             // Probably not the best way to update TextView

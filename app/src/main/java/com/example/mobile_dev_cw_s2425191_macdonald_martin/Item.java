@@ -1,3 +1,8 @@
+//
+// Name                 Martin MacDonald
+// Student ID           s2425191
+// Programme of Study   BSc (Hons) Software Development
+//
 package com.example.mobile_dev_cw_s2425191_macdonald_martin;
 
 import android.util.Log;
@@ -11,6 +16,7 @@ public class Item {
     private String category;
 
 
+    //Getters and Setters.
     public String getTitle(){
         return title;
     }
@@ -18,7 +24,6 @@ public class Item {
         this.title = title;
         Log.d("Item",String.format("Title set: %s",this.title));
     }
-
     public String getLink(){
         return link;
     }
@@ -26,7 +31,6 @@ public class Item {
         this.link = link;
         Log.d("Item",String.format("Link set: %s",this.link));
     }
-
     public String getPubDate() {
         return pubDate;
     }
@@ -34,7 +38,6 @@ public class Item {
         this.pubDate = pubDate;
         Log.d("Item",String.format("pubDate set: %s",this.pubDate));
     }
-
     public String getGuid() {
         return guid;
     }
@@ -42,7 +45,6 @@ public class Item {
         this.guid = guid;
         Log.d("Item",String.format("setGuid set: %s",this.guid));
     }
-
     public String getDescription() {
         return description;
     }
@@ -50,7 +52,6 @@ public class Item {
         this.description = description;
         Log.d("Item",String.format("description set: %s",this.description));
     }
-
     public String getCategory() {
         return category;
     }
