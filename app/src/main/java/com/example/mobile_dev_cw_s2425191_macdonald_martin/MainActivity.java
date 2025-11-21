@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             Log.d("MyTask","in run");
 
+            Item aItem = null;
             try
             {
                 Log.d("MyTask","in try");
@@ -106,20 +107,85 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
 
             // Now that you have the xml data into result, you can parse it
             try {
+                boolean insideAnItem = false;
                 XmlPullParserFactory factory =
                         XmlPullParserFactory.newInstance();
                 factory.setNamespaceAware(true);
                 XmlPullParser xpp = factory.newPullParser();
                 xpp.setInput( new StringReader( result ) );
 
-                //YOUR PARSING HERE!!!
+                //My pullparser
+                int eventType = xpp.getEventType();
+                while (eventType != XmlPullParser.END_DOCUMENT)
+                {
+                    if(eventType == XmlPullParser.START_TAG){
+                        Log.e("Start tag", "Inside XML object");
 
-
-
+                        if(xpp.getName().equalsIgnoreCase("item")){
+                            insideAnItem = true;
+                            aItem = new Item();
+                            Log.e("Inside item", "New item found");
+                        }else if (xpp.getName().equalsIgnoreCase("title")){
+                            String temp = xpp.nextText();
+                            if(insideAnItem){
+                                aItem.setTitle(temp);
+                                Log.d("MyTag", "Item title: " + temp);
+                            }else{
+                                Log.d("MyTag", "Some other title" + temp);
+                            }
+                        }else if(xpp.getName().equalsIgnoreCase("link")){
+                            String temp = xpp.nextText();
+                            if(insideAnItem){
+                                aItem.setLink(temp);
+                                Log.d("MyTag", "Item link: " + temp);
+                            }else{
+                                Log.d("MyTag", "Some other link" + temp);
+                            }
+                        }else if(xpp.getName().equalsIgnoreCase("guid")){
+                            String temp = xpp.nextText();
+                            if(insideAnItem){
+                                aItem.setGuid(temp);
+                                Log.d("MyTag", "Item guid: " + temp);
+                            }else{
+                                Log.d("MyTag", "Some other guid" + temp);
+                            }
+                        }else if(xpp.getName().equalsIgnoreCase("pubDate")){
+                            String temp = xpp.nextText();
+                            if(insideAnItem){
+                                aItem.setPubDate(temp);
+                                Log.d("MyTag", "Item pubDate: " + temp);
+                            }else{
+                                Log.d("MyTag", "Some other pubDate" + temp);
+                            }
+                        }else if(xpp.getName().equalsIgnoreCase("description")){
+                            String temp = xpp.nextText();
+                            if(insideAnItem){
+                                aItem.setDescription(temp);
+                                Log.d("MyTag", "Item description: " + temp);
+                            }else{
+                                Log.d("MyTag", "Some other description" + temp);
+                            }
+                        }else if(xpp.getName().equalsIgnoreCase("category")){
+                            String temp = xpp.nextText();
+                            if(insideAnItem){
+                                aItem.setCategory(temp);
+                                Log.d("MyTag", "Item category: " + temp);
+                            }else{
+                                Log.d("MyTag", "Some other category" + temp);
+                            }
+                        }
+                    } else if(eventType == XmlPullParser.END_TAG){
+                        if(xpp.getName().equalsIgnoreCase("item")){
+                            insideAnItem = false;
+                            Log.d("MyTag", "Item parsing complete");
+                        }
+                    }
+                    eventType = xpp.next();
+                }
             } catch (XmlPullParserException e) {
                 Log.e("Parsing","EXCEPTION" + e);
                 //throw new RuntimeException(e);
-            } catch (IOException e) {
+            }catch (IOException e) {
                 Log.e("Parsing","I/O EXCEPTION" + e);
                 //throw new RuntimeException(e);
             }
