@@ -10,8 +10,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -34,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private String urlSource="https://www.fx-exchange.com/gbp/rss.xml";
     private ArrayList<Item> allItems;
     private ArrayList<Currency> allCurrency;
+    private ListView currencyListView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         rawDataDisplay = (TextView)findViewById(R.id.rawDataDisplay);
         startButton = (Button)findViewById(R.id.startButton);
         startButton.setOnClickListener(this);
+        currencyListView = findViewById(R.id.allCurrencyList);
 
         // More Code goes here
 
@@ -108,7 +114,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             for(Item item : allItems){
                 Currency currency = new Currency();
                 currency.convertItemToCurrency(item);
-                allCurrency.add(currency);
+                //Only add currency with an actual exchange rate
+                if (currency.getGbpToCurrency() != 0.0) {
+                    allCurrency.add(currency);
+                }
             }
 
             ArrayList<Currency> mainCurrencies = new ArrayList<>();
@@ -126,7 +135,18 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             {
                 public void run() {
                     Log.d("UI thread", "I am the UI thread");
-                    rawDataDisplay.setText(result);
+                    //Moved raw RSS data to dialogue box.
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("RSS Data");
+                    builder.setMessage(result);
+                    builder.setPositiveButton("OK", null);
+                    builder.show();
+
+                    //Currency adapter, need to move to another thread.
+                    CustomCurrencyAdapter adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency);
+                    currencyListView.setAdapter(adapter);
+
+                    currencyListView.setAdapter(adapter);
                 }
             });
         }
