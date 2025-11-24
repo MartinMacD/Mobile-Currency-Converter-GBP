@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -18,12 +19,15 @@ public class CurrencyConverterFragment extends Fragment {
     private TextView convertedFrom ;
     private TextView convertedAmount ;
     private TextView convertedTo;
-    private Button swapButton;
+    private ImageButton swapButton;
     private Button convertButton;
     private String currencyCode;
     private double currencyGbpToCurrency;
     private ImageButton closeButton;
     private CustomCurrencyAdapter adapter;
+    private ImageView convertedFromFlag;
+    private ImageView convertedToFlag;
+    private FlagManager flagManager;
 
     //This adapter is used to de-select an item in listview when the X button is selected.
     public void setAdapter(CustomCurrencyAdapter adapter) {
@@ -42,6 +46,11 @@ public class CurrencyConverterFragment extends Fragment {
         swapButton = v.findViewById(R.id.swapButton);
         convertButton = v.findViewById(R.id.convertButton);
         closeButton = v.findViewById(R.id.closeButton);
+        convertedFromFlag = v.findViewById(R.id.convertedFromFlag);
+        convertedToFlag = v.findViewById(R.id.convertedToFlag);
+
+        //Change convertButton background colour to grey.
+        convertButton.setBackgroundColor(0xFFDDDDDD);
 
         //Get the bundle passed in from MainActivity and set the local variables to the values contained within.
         Bundle args = getArguments();
@@ -50,6 +59,12 @@ public class CurrencyConverterFragment extends Fragment {
             convertedTo.setText(currencyCode);
             currencyGbpToCurrency = args.getDouble("currencyGbpToCurrency");
         }
+
+        //Setup the flagManager and get the flag that matches the convertToCode.
+        //No need to do the other flag as it will always be GB.
+        flagManager = new FlagManager();
+        int convertedToflag = flagManager.getFlag(currencyCode);
+        convertedToFlag.setImageResource(convertedToflag);
 
         //Listen for when the swapButton is clicked and then run swapCurrencies().
         swapButton.setOnClickListener(new View.OnClickListener() {
@@ -107,6 +122,12 @@ public class CurrencyConverterFragment extends Fragment {
         String toText = convertedTo.getText().toString();
         convertedFrom.setText(toText);
         convertedTo.setText(fromText);
+
+        //Swap the current flag with the opposite flag and display them to the user.
+        int fromFlag = flagManager.getFlag(fromText);
+        int toFlag = flagManager.getFlag(toText);
+        convertedFromFlag.setImageResource(toFlag);
+        convertedToFlag.setImageResource(fromFlag);
 
         //Even though i've check before that the currency value isn't 0,
         //It's best to check here as a divide by zero will crash the program.

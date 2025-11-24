@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,10 +21,12 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 
 public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
-    Context context;
-    ArrayList<Currency> currencyList;
+    private Context context;
+    private ArrayList<Currency> currencyList;
     //Used to hold position of most recently selected currency so it can be highlighted to the user.
     private int selectedPosition = -1;
+    private FlagManager flagManager;
+
 
     //Used to listen for when the user clicks on an item so it can be highlighted.
     public interface OnConvertClickListener {
@@ -56,12 +59,23 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
         TextView code = listItem.findViewById(R.id.currencyCode);
         TextView rate = listItem.findViewById(R.id.currencyRate);
         Button convertButton = listItem.findViewById(R.id.convertButton);
+        ImageView currencyFlag = listItem.findViewById(R.id.currencyFlag);
 
+        //Change convertButton background colour to grey.
+        convertButton.setBackgroundColor(0xFFDDDDDD);
+
+
+        //Setup the flagManager and get the flag that matches the currency code.
+        flagManager = new FlagManager();
+        int flag = flagManager.getFlag(currentCurrency.getCode());
 
         //Set the fields of the UI.
         name.setText(currentCurrency.getName());
         code.setText(currentCurrency.getCode());
         rate.setText(String.format("1 GBP = %.2f %s", currentCurrency.getGbpToCurrency(), currentCurrency.getCode()));
+        currencyFlag.setImageResource(flag);
+
+
 
         //Used to set the background colour depending on how the currency compares to GBP.
         if (currentCurrency.getGbpToCurrency() < 1.0) {

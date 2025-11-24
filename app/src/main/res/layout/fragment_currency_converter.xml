@@ -45,6 +45,14 @@
             android:layout_marginStart="12dp"
             android:textSize="16sp"
             android:gravity="center_vertical"/>
+
+        <ImageView
+            android:id="@+id/convertedFromFlag"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/flag_gb" />
     </LinearLayout>
 
 
@@ -61,19 +69,17 @@
             android:layout_height="wrap_content"
             android:text="Convert"
             android:textSize="20sp"
-            android:textColor="#0000EE"
-            android:background="@android:color/transparent"
-            android:padding="12dp"/>
+            android:textColor="#000000"
+            android:padding="12dp"
+            android:layout_marginEnd="16dp"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/swapButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⇅"
-            android:textSize="30sp"
-            android:textColor="#0000EE"
+            android:src="@drawable/icons8_swap_48"
             android:background="@android:color/transparent"
-            android:padding="12dp"/>
+            />
 
     </LinearLayout>
 
@@ -86,7 +92,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginBottom="12dp"
-        android:background="@drawable/border_box"> >
+        android:background="@drawable/border_box">
 
         <TextView
             android:id="@+id/equalsSign"
@@ -103,7 +109,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:gravity="center"
-            android:padding="8dp"
+            android:textStyle="bold"
             android:hint="Conversion"/>
 
         <TextView
@@ -111,9 +117,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Result"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="8dp"
             android:textSize="16sp"
             android:gravity="center_vertical"/>
+
+        <ImageView
+            android:id="@+id/convertedToFlag"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/flag_us" />
     </LinearLayout>
 
 

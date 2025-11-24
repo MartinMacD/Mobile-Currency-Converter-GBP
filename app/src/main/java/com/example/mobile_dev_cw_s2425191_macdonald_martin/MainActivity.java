@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         startButton.setOnClickListener(this);
         currencyListView = findViewById(R.id.allCurrencyList);
         fragmentContainer = findViewById(R.id.fragmentContainer);
-
     }
 
     public void onClick(View aview)
