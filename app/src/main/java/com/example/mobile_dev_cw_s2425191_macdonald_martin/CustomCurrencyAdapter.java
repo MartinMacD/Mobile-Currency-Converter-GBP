@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,11 +22,22 @@ import java.util.ArrayList;
 public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
     Context context;
     ArrayList<Currency> currencyList;
+    //Used to hold position of most recently selected currency so it can be highlighted to the user.
+    private int selectedPosition = -1;
+
+    //Used to listen for when the user clicks on an item so it can be highlighted.
+    public interface OnConvertClickListener {
+        void onConvertClick(Currency currency);
+    }
+
+    private OnConvertClickListener listener;
+
     //Overload the default constructor with context and the list of currency to be displayed.
-    public CustomCurrencyAdapter(Context applicationContext, ArrayList<Currency> currencyList){
+    public CustomCurrencyAdapter(Context applicationContext, ArrayList<Currency> currencyList, OnConvertClickListener listener){
         super(applicationContext, 0, currencyList);
         this.context = applicationContext;
         this.currencyList = currencyList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -43,6 +55,7 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
         TextView name = listItem.findViewById(R.id.currencyName);
         TextView code = listItem.findViewById(R.id.currencyCode);
         TextView rate = listItem.findViewById(R.id.currencyRate);
+        Button convertButton = listItem.findViewById(R.id.convertButton);
 
 
         //Set the fields of the UI.
@@ -65,6 +78,32 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
             rate.setTextColor(0xFFFFFFFF);
         }
 
+        //Highlight the selected currency with a grey background to allow the user to see which is selected.
+        if (i == selectedPosition) {
+            listItem.setBackgroundColor(0xFFE0E0E0); // grey
+        } else {
+            listItem.setBackgroundColor(0x00000000); // transparent
+        }
+
+
+        convertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onConvertClick(currentCurrency);
+                }
+                //Highlight the currency selected by the user.
+                setSelectedPosition(i);
+            }
+        });
         return listItem;
     }
+
+    //Highlight the selected position of the currency the user has most recently chosen to convert.
+    public void setSelectedPosition(int position){
+        selectedPosition = position;
+        // refresh the viewList
+        notifyDataSetChanged();
+    }
+
 }

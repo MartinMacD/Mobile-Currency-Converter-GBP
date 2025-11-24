@@ -10,12 +10,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -38,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private ArrayList<Item> allItems;
     private ArrayList<Currency> allCurrency;
     private ListView currencyListView;
+    private CustomCurrencyAdapter adapter;
+    private FrameLayout fragmentContainer;
 
 
     @Override
@@ -49,8 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         startButton = (Button)findViewById(R.id.startButton);
         startButton.setOnClickListener(this);
         currencyListView = findViewById(R.id.allCurrencyList);
-
-        // More Code goes here
+        fragmentContainer = findViewById(R.id.fragmentContainer);
 
     }
 
@@ -143,10 +147,15 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     builder.show();
 
                     //Currency adapter, need to move to another thread.
-                    CustomCurrencyAdapter adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency);
+                    adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency, new CustomCurrencyAdapter.OnConvertClickListener() {
+                        @Override
+                        public void onConvertClick(Currency currency) {
+                            // Pass selected currency
+                            showCurrencyConverterFragment(currency);
+                        }
+                    });
                     currencyListView.setAdapter(adapter);
 
-                    currencyListView.setAdapter(adapter);
                 }
             });
         }
@@ -239,6 +248,32 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             Log.e("Parsing","I/O EXCEPTION" + e);
             //throw new RuntimeException(e);
         }
+    }
+
+    public void showCurrencyConverterFragment(Currency currency) {
+        //Set the fragment to be visible by the user.
+        fragmentContainer.setVisibility(View.VISIBLE);
+
+        //Create a new CurrencyConverterFragment object.
+        CurrencyConverterFragment fragment = new CurrencyConverterFragment();
+
+        //Add currencyCode, currencyName and currencyGbpToCurrency to the bundle and add that bundle to the fragment.
+        Bundle args = new Bundle();
+        args.putString("currencyCode", currency.getCode());
+        args.putString("currencyName", currency.getName());
+        args.putDouble("currencyGbpToCurrency", currency.getGbpToCurrency());
+        fragment.setArguments(args);
+
+        //Set the adapter to the one used by customCurrencyAdapter.
+        fragment.setAdapter(adapter);
+
+        //Create a new fragmentManager and fragmentTransaction.
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        //Display the currencyConverterFragment in the container.
+        fragmentTransaction.replace(R.id.fragmentContainer, fragment);
+        fragmentTransaction.commit();
     }
 
 
