@@ -88,6 +88,16 @@ public class MainActivity extends AppCompatActivity{
             public void afterTextChanged(Editable s) {}
         });
 
+        //Setup fragment by attempting to load it
+        CurrencyConverterFragment fragment =
+                (CurrencyConverterFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.fragmentContainer);
+        //If the fragment is not null, set it to be visible and attach the adapter to it
+        if (fragment != null) {
+            fragmentContainer.setVisibility(View.VISIBLE);
+            fragment.setAdapter(adapter);
+        }
+
         updateXMLFeed();
     }
 
@@ -325,16 +335,29 @@ public class MainActivity extends AppCompatActivity{
 
     //Used to display the currency converter fragment when the user clicks the convert button on a currency.
     public void showCurrencyConverterFragment(Currency currency) {
-        //Set the fragment to be visible by the user.
-        fragmentContainer.setVisibility(View.VISIBLE);
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
+        //Attempt to load the existing fragment.
+        CurrencyConverterFragment existingFragment =
+                (CurrencyConverterFragment) fragmentManager.findFragmentById(R.id.fragmentContainer);
+
+        //If it exists, update the fields of the fragment with the relevant currency fields.
+        if (existingFragment != null) {
+            existingFragment.updateCurrency(
+                    currency.getCode(),
+                    currency.getName(),
+                    currency.getGbpToCurrency()
+            );
+            //Highlight the currently selected in the list view.
+            adapter.setSelectedPosition(currency.getCode());
+            return;
+        }
         //Create a new CurrencyConverterFragment object.
         CurrencyConverterFragment fragment = new CurrencyConverterFragment();
 
-        //Add currencyCode, currencyName and currencyGbpToCurrency to the bundle and add that bundle to the fragment.
+        //Add currency code and conversion rate to the fragment arguments
         Bundle args = new Bundle();
         args.putString("currencyCode", currency.getCode());
-        args.putString("currencyName", currency.getName());
         args.putDouble("currencyGbpToCurrency", currency.getGbpToCurrency());
         fragment.setArguments(args);
 
@@ -342,12 +365,10 @@ public class MainActivity extends AppCompatActivity{
         fragment.setAdapter(adapter);
 
         //Create a new fragmentManager and fragmentTransaction.
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        //Display the currencyConverterFragment in the container.
-        fragmentTransaction.replace(R.id.fragmentContainer, fragment);
-        fragmentTransaction.commit();
+        fragmentContainer.setVisibility(View.VISIBLE);
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, fragment)
+                .commit();
     }
 
 
