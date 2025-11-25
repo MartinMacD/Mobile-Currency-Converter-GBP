@@ -19,7 +19,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -206,8 +205,19 @@ public class MainActivity extends AppCompatActivity{
         }
         catch (IOException ae) {
             Log.e("MyTask", "ioexception");
+            //If unable to connect to the internet, display a dialog to the user with the option to retry their connection.
+            runOnUiThread(() -> {
+                new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this)
+                        .setTitle("No Internet Connection")
+                        .setMessage("Unable to fetch currency data. Please check your internet connection.")
+                        .setPositiveButton("Retry", (dialog, which) -> {
+                            updateXMLFeed();
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .setCancelable(false)
+                        .show();
+            });
         }
-
         result = cleanXMLData(result);
     }
 

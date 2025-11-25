@@ -44,7 +44,7 @@
         android:id="@+id/searchBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search currency..."
+        android:hint="🔍 Search currency..."
         android:padding="8dp"
         android:inputType="text"/>
     <ListView
