@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity{
         } else {
             pubDate.setText("FX currency data published: N/A");
         }
+        Log.d("MainActivity", "UI refreshed");
     }
 
     //Used to fetch the XML feed.
@@ -190,11 +191,11 @@ public class MainActivity extends AppCompatActivity{
         String inputLine = "";
         result = "";
 
-        Log.d("MyTask","in run");
+        Log.d("XML data fetching","Starting fetch of XML data");
 
         try
         {
-            Log.d("MyTask","in try");
+            Log.d("XML data fetching","Attempting fetch");
             aurl = new URL(url);
             yc = aurl.openConnection();
             in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
@@ -204,7 +205,8 @@ public class MainActivity extends AppCompatActivity{
             in.close();
         }
         catch (IOException ae) {
-            Log.e("MyTask", "ioexception");
+            Log.e("XML data fetching", "ioexception");
+            Log.e("XML data fetching", "Unable to connect to the internet");
             //If unable to connect to the internet, display a dialog to the user with the option to retry their connection.
             runOnUiThread(() -> {
                 new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this)
@@ -219,6 +221,7 @@ public class MainActivity extends AppCompatActivity{
             });
         }
         result = cleanXMLData(result);
+        Log.d("XML data fetching", "Successful fetch of xml data");
     }
 
     //Used to clean up the raw XML data feed.
@@ -257,12 +260,12 @@ public class MainActivity extends AppCompatActivity{
             while (eventType != XmlPullParser.END_DOCUMENT)
             {
                 if(eventType == XmlPullParser.START_TAG){
-                    Log.e("Start tag", "Inside XML object");
+                    Log.d("Start tag", "Inside XML object");
 
                     if(xpp.getName().equalsIgnoreCase("item")){
                         insideAnItem = true;
                         aItem = new Item();
-                        Log.e("Inside item", "New item found");
+                        Log.d("Inside item", "New item found");
                     }else if (xpp.getName().equalsIgnoreCase("title")){
                         String temp = xpp.nextText();
                         if(insideAnItem){
@@ -336,6 +339,7 @@ public class MainActivity extends AppCompatActivity{
         for (Item item : allItems) {
             Currency currency = new Currency();
             currency.convertItemToCurrency(item);
+            Log.d("MainActivity", "Converted item to currency, name: " + currency.getCode() + ", code: " + currency.getName());
             // Only add currency with an actual exchange rate
             if (currency.getGbpToCurrency() != 0.0) {
                 allCurrency.add(currency);

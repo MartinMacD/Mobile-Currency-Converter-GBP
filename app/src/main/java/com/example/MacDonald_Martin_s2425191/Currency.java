@@ -67,8 +67,7 @@ public class Currency {
         setName(targetPart.substring(0, targetPart.indexOf("(")));
         //Set the code of the currency using a substring which pulls the text between the ( and ).
         setCode(targetPart.substring(targetPart.indexOf("(") + 1, targetPart.indexOf(")")));
-        Log.d("Currency object", "Name: " + this.name);
-        Log.d("Currency object", "Code: " + this.code);
+        Log.d("Currency object", "Inside currency object, Name: " + this.name + "Code: " + this.code);
 
         //Take the description from the Item and split it where the = is and store both parts as an array.
         String[] descParts = item.getDescription().split("=");
@@ -84,13 +83,12 @@ public class Currency {
         //Because it is the subject in all queries.
         setCurrencyToGbp(1.0 / rate);
 
-        Log.d("Currency object", "GBPToCurrency: " + this.gbpToCurrency);
-        Log.d("Currency object", "CurrencyToGBP: " + this.currencyToGbp);
+        Log.d("Currency object", "Inside currency object, GBPToCurrency: " + this.gbpToCurrency + "CurrencyToGBP: " + this.currencyToGbp);
 
         //Set the pubDate to the pubDate within the Item.
         setPubDate(item.getPubDate());
 
-        Log.d("Currency object", "PubDate: " + this.pubDate);
+        Log.d("Currency object", "Inside currency object, PubDate: " + this.pubDate);
 
     }
 }

@@ -6,6 +6,7 @@
 package com.example.MacDonald_Martin_s2425191;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -151,9 +152,11 @@ public class CurrencyConverterFragment extends Fragment {
             double result = amount * currencyGbpToCurrency;
 
             convertedAmount.setText(String.format("%.2f", result));
+            Log.d("CurrencyConverterFragment", "Input amount: " + input + ", Result: " + String.format("%.2f", result));
             //If there's an error, set the convertedAmount to 0 to prevent a crash.
         } catch (NumberFormatException e) {
             convertedAmount.setText("0");
+            Log.e("NumberFormatException", "CurrencyConverterFragment unable to parse number entered");
         }
 
     }

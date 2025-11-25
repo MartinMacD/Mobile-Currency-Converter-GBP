@@ -8,6 +8,7 @@
 package com.example.MacDonald_Martin_s2425191;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,9 +75,13 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
 
         //Set the fields of the UI.
         name.setText(currentCurrency.getName());
+        Log.d("CustomCurrencyAdapter", "Currency name: " + currentCurrency.getName());
         code.setText(currentCurrency.getCode());
+        Log.d("CustomCurrencyAdapter", "Currency code: " + currentCurrency.getCode());
         rate.setText(String.format("1 GBP = %.2f %s", currentCurrency.getGbpToCurrency(), currentCurrency.getCode()));
+        Log.d("CustomCurrencyAdapter", "Currency conversion: " + String.format("1 GBP = %.2f %s", currentCurrency.getGbpToCurrency(), currentCurrency.getCode()));
         currencyFlag.setImageResource(flag);
+        Log.d("CustomCurrencyAdapter", "Currency flag: " + flag);
 
 
 
@@ -111,6 +116,7 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
                 }
                 //Highlight the currency selected by the user.
                 setSelectedPosition(currentCurrency.getCode());
+                Log.d("CustomCurrencyAdapter", "User clicked to convert: " + currentCurrency.getName() + " with code: " + currentCurrency.getCode());
             }
         });
         return listItem;
