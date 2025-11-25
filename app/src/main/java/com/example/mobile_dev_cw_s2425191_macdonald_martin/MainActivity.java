@@ -7,18 +7,16 @@
 package com.example.mobile_dev_cw_s2425191_macdonald_martin;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.view.View.OnClickListener;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -33,16 +31,18 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity implements OnClickListener {
-    private TextView rawDataDisplay;
-    private Button startButton;
+public class MainActivity extends AppCompatActivity{
+    private TextView timeFeedUpdated;
+    private TextView pubDate;
     private String result;
-    private String url1="";
     private String urlSource="https://www.fx-exchange.com/gbp/rss.xml";
     private ArrayList<Item> allItems;
     private ArrayList<Currency> allCurrency;
@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private String lastSelectedCurrencyCode = null;
     private String currentSearchText = "";
     private Executor executor = Executors.newSingleThreadExecutor();
+    private Handler handler = new Handler();
+    private long refreshInterval = 60 * 1000;
 
 
     //When the app is created, set all variables up and setup search box listener.
@@ -61,9 +63,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // Set up the raw links to the graphical components
-        rawDataDisplay = (TextView)findViewById(R.id.rawDataDisplay);
-        startButton = (Button)findViewById(R.id.startButton);
-        startButton.setOnClickListener(this);
+        timeFeedUpdated = findViewById(R.id.timeFeedUpdated);
+        pubDate = findViewById(R.id.pubDate);
         currencyListView = findViewById(R.id.allCurrencyList);
         fragmentContainer = findViewById(R.id.fragmentContainer);
         searchBox = findViewById(R.id.searchBox);
@@ -84,29 +85,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
+
+        updateXMLFeed();
     }
 
     //When the app is shut, destroy the executor to prevent memory leaks.
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
         if (executor instanceof ExecutorService) {
             ((ExecutorService) executor).shutdownNow();
         }
     }
 
-    public void onClick(View aview)
-    {
-        startProgress();
-    }
-
-
     //Uses the executor to run background processes on the background thread and updates the UI on the main thread.
-    public void startProgress()
+    public void updateXMLFeed()
     {
         executor.execute(new Runnable() {
             @Override
@@ -126,16 +122,17 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                 });
             }
         });
+        //Delays the UI from being updated until 60 seconds have passed to try and get a new version of the currency data.
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateXMLFeed();
+            }
+        }, refreshInterval);
     }
 
     //Used to update all UI elements.
     public void updateUI() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle("RSS Data");
-        builder.setMessage(result);
-        builder.setPositiveButton("OK", null);
-        builder.show();
-
         //Currency adapter, need to move to another thread.
         if (adapter == null) {
             // Runs the first time the adapter is created.
@@ -158,6 +155,21 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
             if (lastSelectedCurrencyCode != null) {
                 adapter.setSelectedPosition(lastSelectedCurrencyCode);
             }
+        }
+
+        //Set timeFeedUpdated to the moment that UI is updated, to see when it was last refreshed.
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        String currentTime = sdf.format(new Date());
+        timeFeedUpdated.setText("List refreshed: " + currentTime);
+
+        //If the list containing currencies is not empty
+        if (!allCurrency.isEmpty()) {
+            //Get the pubDate from the first currency in the list.
+            String firstPubDate = allCurrency.get(0).getPubDate();
+            pubDate.setText("FX currency data published: " + firstPubDate);
+            //Else, display an error message.
+        } else {
+            pubDate.setText("FX currency data published: N/A");
         }
     }
 
