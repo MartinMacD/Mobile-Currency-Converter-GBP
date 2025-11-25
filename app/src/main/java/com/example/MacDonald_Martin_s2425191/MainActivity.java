@@ -4,7 +4,7 @@
 // Programme of Study   BSc (Hons) Software Development
 //
 
-package com.example.mobile_dev_cw_s2425191_macdonald_martin;
+package com.example.MacDonald_Martin_s2425191;
 
 import android.os.Bundle;
 import android.os.Handler;

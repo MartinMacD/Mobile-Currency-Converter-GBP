@@ -1,4 +1,9 @@
-package com.example.mobile_dev_cw_s2425191_macdonald_martin;
+//
+// Name                 Martin MacDonald
+// Student ID           s2425191
+// Programme of Study   BSc (Hons) Software Development
+//
+package com.example.MacDonald_Martin_s2425191;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

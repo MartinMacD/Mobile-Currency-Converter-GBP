@@ -1,4 +1,4 @@
-package com.example.mobile_dev_cw_s2425191_macdonald_martin;
+package com.example.MacDonald_Martin_s2425191;
 
 import org.junit.Test;
 

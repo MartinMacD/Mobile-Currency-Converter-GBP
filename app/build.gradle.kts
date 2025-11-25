@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mobile_dev_cw_s2425191_macdonald_martin"
+    namespace = "com.example.MacDonald_Martin_s2425191"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.mobile_dev_cw_s2425191_macdonald_martin"
+        applicationId = "com.example.MacDonald_Martin_s2425191"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

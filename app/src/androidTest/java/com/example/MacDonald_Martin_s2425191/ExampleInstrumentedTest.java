@@ -1,4 +1,4 @@
-package com.example.mobile_dev_cw_s2425191_macdonald_martin;
+package com.example.MacDonald_Martin_s2425191;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.example.mobile_dev_cw_s2425191_macdonald_martin", appContext.getPackageName());
+        assertEquals("com.example.MacDonald_Martin_s2425191", appContext.getPackageName());
     }
 }

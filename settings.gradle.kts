@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Mobile_Dev_CW_s2425191_MacDonald_Martin"
+rootProject.name = "MacDonald_Martin_s2425191"
 include(":app")
  

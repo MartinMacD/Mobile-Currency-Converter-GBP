@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.Mobile_Dev_CW_s2425191_MacDonald_Martin" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.MacDonald_Martin_s2425191" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.Mobile_Dev_CW_s2425191_MacDonald_Martin" parent="Base.Theme.Mobile_Dev_CW_s2425191_MacDonald_Martin" />
+    <style name="Theme.MacDonald_Martin_s2425191" parent="Base.Theme.MacDonald_Martin_s2425191" />
 </resources>
