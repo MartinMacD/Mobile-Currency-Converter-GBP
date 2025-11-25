@@ -27,6 +27,7 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
     //Used to hold the most recently selected currency so it can be highlighted to the user.
     private String selectedCurrencyCode = null;
     private FlagManager flagManager;
+    private String currentSearchText = "";
 
 
     //Used to listen for when the user clicks on an item so it can be highlighted.
@@ -117,17 +118,17 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
 
     public void filter(String text){
         //Store the text typed into the search bar by the user.
-        text = text.toUpperCase().trim();
+        currentSearchText = text.toUpperCase().trim();
         //Clear the currencyList to make way for the search results.
         currencyList.clear();
 
         //If the user hasn't typed anything, display all the currencies.
-        if (text.isEmpty()) {
+        if (currentSearchText.isEmpty()) {
             currencyList.addAll(currencyListFull);
         } else {
             //Otherwise, find only the currencies with codes or names that match the entered text and add them to currencyList.
             for (Currency c : currencyListFull) {
-                if (c.getCode().toUpperCase().contains(text) || c.getName().toUpperCase().contains(text)) {
+                if (c.getCode().toUpperCase().contains(currentSearchText) || c.getName().toUpperCase().contains(currentSearchText)) {
                     currencyList.add(c);
                 }
             }
@@ -147,6 +148,15 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
     public void clearSelectedCurrency() {
         selectedCurrencyCode = null;
         notifyDataSetChanged();
+    }
+
+    public void updateData(ArrayList<Currency> newList) {
+        // Clear the full list first
+        currencyListFull.clear();
+        currencyListFull.addAll(newList);
+
+        // Reapply the current filter
+        filter(currentSearchText);
     }
 
 }

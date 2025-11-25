@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private CustomCurrencyAdapter adapter;
     private FrameLayout fragmentContainer;
     private EditText searchBox;
+    private String lastSelectedCurrencyCode = null;
+    private String currentSearchText = "";
 
 
     @Override
@@ -60,6 +62,27 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         currencyListView = findViewById(R.id.allCurrencyList);
         fragmentContainer = findViewById(R.id.fragmentContainer);
         searchBox = findViewById(R.id.searchBox);
+        allItems = new ArrayList<>();
+        allCurrency = new ArrayList<>();
+
+        //Listener to update CustomCurrencyAdapter when the user enters something into the search bar.
+        searchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (adapter != null) {
+                    currentSearchText = s.toString();
+                    adapter.filter(currentSearchText);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     public void onClick(View aview)
@@ -83,41 +106,13 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
         @Override
         public void run(){
-            URL aurl;
-            URLConnection yc;
-            BufferedReader in = null;
-            String inputLine = "";
 
-            Log.d("MyTask","in run");
+            fetchXMLData(url);
 
-            allItems = new ArrayList<>();
-
-            try
-            {
-                Log.d("MyTask","in try");
-                aurl = new URL(url);
-                yc = aurl.openConnection();
-                in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
-                while ((inputLine = in.readLine()) != null){
-                    result = result + inputLine;
-                }
-                in.close();
-            }
-            catch (IOException ae) {
-                Log.e("MyTask", "ioexception");
-            }
-
-            //Clean up any leading garbage characters
-            int i = result.indexOf("<?"); //initial tag
-            result = result.substring(i);
-
-            //Clean up any trailing garbage at the end of the file
-            i = result.indexOf("</rss>"); //final tag
-            result = result.substring(0, i + 6);
-
+            allItems.clear();
             parseXMLData();
 
-            allCurrency = new ArrayList<>();
+            allCurrency.clear();
 
             for(Item item : allItems){
                 Currency currency = new Currency();
@@ -151,38 +146,84 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                     builder.show();
 
                     //Currency adapter, need to move to another thread.
-                    adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency, new CustomCurrencyAdapter.OnConvertClickListener() {
-                        @Override
-                        public void onConvertClick(Currency currency) {
-                            // Pass selected currency
-                            showCurrencyConverterFragment(currency);
-                        }
-                    });
-                    currencyListView.setAdapter(adapter);
-
-                    //Listener to update CustomCurrencyAdapter when the user enters something into the search bar.
-                    searchBox.addTextChangedListener(new TextWatcher() {
-                        @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                        @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {
-                            if (adapter != null) {
-                                adapter.filter(s.toString());
+                    if (adapter == null) {
+                        // Runs the first time the adapter is created.
+                        adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency, new CustomCurrencyAdapter.OnConvertClickListener() {
+                            @Override
+                            public void onConvertClick(Currency currency) {
+                                //Highlight the most recently selected currency.
+                                lastSelectedCurrencyCode = currency.getCode();
+                                showCurrencyConverterFragment(currency);
                             }
-                        }
+                        });
+                        currencyListView.setAdapter(adapter);
+                    } else {
+                        // Runs when the adapter is refreshed with new data.
+                        //Update the data in the adapter then search again.
+                        adapter.updateData(allCurrency);
+                        adapter.filter(currentSearchText);
 
-                        @Override
-                        public void afterTextChanged(Editable s) {
-
+                        //Highlight the last selected currency.
+                        if (lastSelectedCurrencyCode != null) {
+                            adapter.setSelectedPosition(lastSelectedCurrencyCode);
                         }
-                    });
+                    }
+
+
 
                 }
             });
         }
     }
 
+    //Used to fetch the XML feed.
+    public void fetchXMLData(String url){
+        URL aurl;
+        URLConnection yc;
+        BufferedReader in = null;
+        String inputLine = "";
+        result = "";
+
+        Log.d("MyTask","in run");
+
+        try
+        {
+            Log.d("MyTask","in try");
+            aurl = new URL(url);
+            yc = aurl.openConnection();
+            in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
+            while ((inputLine = in.readLine()) != null){
+                result = result + inputLine;
+            }
+            in.close();
+        }
+        catch (IOException ae) {
+            Log.e("MyTask", "ioexception");
+        }
+
+        result = cleanXMLData(result);
+    }
+
+    //Used to clean up the raw XML data feed.
+    private String cleanXMLData(String xml){
+        //If there is no xml data, return "";
+        if(xml == null){
+            return "";
+        }
+
+        //Find the start of the XML file.
+        int start = xml.indexOf("<?");
+        //Find the end of the XML file.
+        int end = xml.indexOf("</rss>");
+        //Only extract the substring if both of the tags exist and the end index occurs after the start index.
+        //end + 6 includes the full rss tag in output.
+        if (start >= 0 && end > start) {
+            return xml.substring(start, end + 6);
+        }
+        return xml;
+    }
+
+    //Used to parse the XML data from the feed into Item objects.
     public void parseXMLData(){
         Item aItem = null;
         // Now that you have the xml data into result, you can parse it
@@ -272,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }
     }
 
+    //Used to display the currency converter fragment when the user clicks the convert button on a currency.
     public void showCurrencyConverterFragment(Currency currency) {
         //Set the fragment to be visible by the user.
         fragmentContainer.setVisibility(View.VISIBLE);
