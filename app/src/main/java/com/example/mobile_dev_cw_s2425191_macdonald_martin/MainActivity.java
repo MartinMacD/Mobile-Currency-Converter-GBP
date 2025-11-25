@@ -34,6 +34,9 @@ import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements OnClickListener {
     private TextView rawDataDisplay;
@@ -49,8 +52,10 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private EditText searchBox;
     private String lastSelectedCurrencyCode = null;
     private String currentSearchText = "";
+    private Executor executor = Executors.newSingleThreadExecutor();
 
 
+    //When the app is created, set all variables up and setup search box listener.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,94 +90,74 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         });
     }
 
+    //When the app is shut, destroy the executor to prevent memory leaks.
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (executor instanceof ExecutorService) {
+            ((ExecutorService) executor).shutdownNow();
+        }
+    }
+
     public void onClick(View aview)
     {
         startProgress();
     }
 
+
+    //Uses the executor to run background processes on the background thread and updates the UI on the main thread.
     public void startProgress()
     {
-        // Run network access on a separate thread;
-        new Thread(new Task(urlSource)).start();
-    } //
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                fetchXMLData(urlSource);
 
-    // Need separate thread to access the internet resource over network
-    // Other neater solutions should be adopted in later iterations.
-    private class Task implements Runnable
-    {
-        private String url;
-        public Task(String aurl){
-            url = aurl;
-        }
-        @Override
-        public void run(){
+                allItems.clear();
+                parseXMLData();
+                allCurrency.clear();
+                convertItemsToCurrencies();
 
-            fetchXMLData(url);
-
-            allItems.clear();
-            parseXMLData();
-
-            allCurrency.clear();
-
-            for(Item item : allItems){
-                Currency currency = new Currency();
-                currency.convertItemToCurrency(item);
-                //Only add currency with an actual exchange rate
-                if (currency.getGbpToCurrency() != 0.0) {
-                    allCurrency.add(currency);
-                }
-            }
-
-            ArrayList<Currency> mainCurrencies = new ArrayList<>();
-            for (Currency c : allCurrency) {
-                if (c.getCode().equals("USD") || c.getCode().equals("EUR") || c.getCode().equals("JPY")) {
-                    mainCurrencies.add(c);
-                }
-            }
-
-            // Now update the TextView to display raw XML data
-            // Probably not the best way to update TextView
-            // but we are just getting started !
-
-            MainActivity.this.runOnUiThread(new Runnable()
-            {
-                public void run() {
-                    Log.d("UI thread", "I am the UI thread");
-                    //Moved raw RSS data to dialogue box.
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("RSS Data");
-                    builder.setMessage(result);
-                    builder.setPositiveButton("OK", null);
-                    builder.show();
-
-                    //Currency adapter, need to move to another thread.
-                    if (adapter == null) {
-                        // Runs the first time the adapter is created.
-                        adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency, new CustomCurrencyAdapter.OnConvertClickListener() {
-                            @Override
-                            public void onConvertClick(Currency currency) {
-                                //Highlight the most recently selected currency.
-                                lastSelectedCurrencyCode = currency.getCode();
-                                showCurrencyConverterFragment(currency);
-                            }
-                        });
-                        currencyListView.setAdapter(adapter);
-                    } else {
-                        // Runs when the adapter is refreshed with new data.
-                        //Update the data in the adapter then search again.
-                        adapter.updateData(allCurrency);
-                        adapter.filter(currentSearchText);
-
-                        //Highlight the last selected currency.
-                        if (lastSelectedCurrencyCode != null) {
-                            adapter.setSelectedPosition(lastSelectedCurrencyCode);
-                        }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateUI();
                     }
+                });
+            }
+        });
+    }
 
+    //Used to update all UI elements.
+    public void updateUI() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("RSS Data");
+        builder.setMessage(result);
+        builder.setPositiveButton("OK", null);
+        builder.show();
 
-
+        //Currency adapter, need to move to another thread.
+        if (adapter == null) {
+            // Runs the first time the adapter is created.
+            adapter = new CustomCurrencyAdapter(MainActivity.this, allCurrency, new CustomCurrencyAdapter.OnConvertClickListener() {
+                @Override
+                public void onConvertClick(Currency currency) {
+                    //Highlight the most recently selected currency.
+                    lastSelectedCurrencyCode = currency.getCode();
+                    showCurrencyConverterFragment(currency);
                 }
             });
+            currencyListView.setAdapter(adapter);
+        } else {
+            // Runs when the adapter is refreshed with new data.
+            //Update the data in the adapter then search again.
+            adapter.updateData(allCurrency);
+            adapter.filter(currentSearchText);
+
+            //Highlight the last selected currency.
+            if (lastSelectedCurrencyCode != null) {
+                adapter.setSelectedPosition(lastSelectedCurrencyCode);
+            }
         }
     }
 
@@ -310,6 +295,19 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         }catch (IOException e) {
             Log.e("Parsing","I/O EXCEPTION" + e);
             //throw new RuntimeException(e);
+        }
+    }
+
+    //Used to convert the newly parsed item objects into currency objects and store them as an arraylist.
+    private void convertItemsToCurrencies() {
+        allCurrency.clear();
+        for (Item item : allItems) {
+            Currency currency = new Currency();
+            currency.convertItemToCurrency(item);
+            // Only add currency with an actual exchange rate
+            if (currency.getGbpToCurrency() != 0.0) {
+                allCurrency.add(currency);
+            }
         }
     }
 
