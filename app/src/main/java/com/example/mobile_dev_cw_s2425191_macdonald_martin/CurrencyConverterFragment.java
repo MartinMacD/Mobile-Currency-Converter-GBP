@@ -143,9 +143,9 @@ public class CurrencyConverterFragment extends Fragment {
     }
 
     private void closeFragment(){
-        //If there is an adapter, set the selectedPosition to -1, deselecting the item in listview.
+        //If there is an adapter, clear the currently selected currency, de-highlighting it in list view.
         if (adapter != null) {
-            adapter.setSelectedPosition(-1);
+            adapter.clearSelectedCurrency();
         }
 
         //Setup fragmentmanager and fragment to the current fragment.

@@ -23,8 +23,9 @@ import java.util.ArrayList;
 public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
     private Context context;
     private ArrayList<Currency> currencyList;
-    //Used to hold position of most recently selected currency so it can be highlighted to the user.
-    private int selectedPosition = -1;
+    private ArrayList<Currency> currencyListFull;
+    //Used to hold the most recently selected currency so it can be highlighted to the user.
+    private String selectedCurrencyCode = null;
     private FlagManager flagManager;
 
 
@@ -40,6 +41,7 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
         super(applicationContext, 0, currencyList);
         this.context = applicationContext;
         this.currencyList = currencyList;
+        this.currencyListFull = new ArrayList<>(currencyList);
         this.listener = listener;
     }
 
@@ -93,7 +95,7 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
         }
 
         //Highlight the selected currency with a grey background to allow the user to see which is selected.
-        if (i == selectedPosition) {
+        if (currentCurrency.getCode().equals(selectedCurrencyCode)) {
             listItem.setBackgroundColor(0xFFE0E0E0); // grey
         } else {
             listItem.setBackgroundColor(0x00000000); // transparent
@@ -107,16 +109,43 @@ public class CustomCurrencyAdapter extends ArrayAdapter<Currency> {
                     listener.onConvertClick(currentCurrency);
                 }
                 //Highlight the currency selected by the user.
-                setSelectedPosition(i);
+                setSelectedPosition(currentCurrency.getCode());
             }
         });
         return listItem;
     }
 
+    public void filter(String text){
+        //Store the text typed into the search bar by the user.
+        text = text.toUpperCase().trim();
+        //Clear the currencyList to make way for the search results.
+        currencyList.clear();
+
+        //If the user hasn't typed anything, display all the currencies.
+        if (text.isEmpty()) {
+            currencyList.addAll(currencyListFull);
+        } else {
+            //Otherwise, find only the currencies with codes or names that match the entered text and add them to currencyList.
+            for (Currency c : currencyListFull) {
+                if (c.getCode().toUpperCase().contains(text) || c.getName().toUpperCase().contains(text)) {
+                    currencyList.add(c);
+                }
+            }
+        }
+        //Update the data set.
+        notifyDataSetChanged();
+    }
+
     //Highlight the selected position of the currency the user has most recently chosen to convert.
-    public void setSelectedPosition(int position){
-        selectedPosition = position;
+    public void setSelectedPosition(String currencyCode){
+        selectedCurrencyCode = currencyCode;
         // refresh the viewList
+        notifyDataSetChanged();
+    }
+
+    //Clear the selected currency, de-highlighting the space in ListView.
+    public void clearSelectedCurrency() {
+        selectedCurrencyCode = null;
         notifyDataSetChanged();
     }
 

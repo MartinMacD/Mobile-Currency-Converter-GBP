@@ -7,9 +7,12 @@
 package com.example.mobile_dev_cw_s2425191_macdonald_martin;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
     private ListView currencyListView;
     private CustomCurrencyAdapter adapter;
     private FrameLayout fragmentContainer;
+    private EditText searchBox;
 
 
     @Override
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
         startButton.setOnClickListener(this);
         currencyListView = findViewById(R.id.allCurrencyList);
         fragmentContainer = findViewById(R.id.fragmentContainer);
+        searchBox = findViewById(R.id.searchBox);
     }
 
     public void onClick(View aview)
@@ -154,6 +159,24 @@ public class MainActivity extends AppCompatActivity implements OnClickListener {
                         }
                     });
                     currencyListView.setAdapter(adapter);
+
+                    //Listener to update CustomCurrencyAdapter when the user enters something into the search bar.
+                    searchBox.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                            if (adapter != null) {
+                                adapter.filter(s.toString());
+                            }
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+
+                        }
+                    });
 
                 }
             });
